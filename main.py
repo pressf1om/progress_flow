@@ -49,6 +49,7 @@ number = None
 hotp = None
 result_ver = None
 user_auth_dict = None
+my_nickname = None
 
 
 # классы с данными о юзерах, компаниях, проектах, задачах
@@ -218,6 +219,7 @@ def confirmation(token):
 def login():
 
     global user_auth_dict
+    global my_nickname
 
     # Если пользователь заходит не авторизованный, то ему предлагают авторизоваться
     if request.method == "GET":
@@ -243,6 +245,7 @@ def login():
 
             # если данные совпадают, то мы авторизовываем пользователя
             if user__auth == login__ and pass__auth == password__:
+                my_nickname = user__auth
                 login_user(user_auth)
                 return 'ВЫ ВОЛШЛТ'
 
@@ -273,11 +276,14 @@ def print_user():
     return render_template("admin_of_progressfow.html", data=user_print)
 
 
-# личный кабинет
-@app.route('/successful_registration')
+# личный кабинет ( В процессе )
+@app.route('/account/<my_nickname>')
 @login_required
-def successful_registration():
-    return render_template("successful_registration.html")
+def my_my_account(name_auth):
+    global my_nickname
+
+    return render_template("my_account.html")
+
 
 
 if __name__ == '__main__':
