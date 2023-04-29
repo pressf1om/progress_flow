@@ -48,6 +48,8 @@ hotp = None
 result_ver = None
 user_auth_dict = None
 my_nickname = None
+is_auth = None
+user__auth = None
 
 
 # классы с данными о юзерах, компаниях, проектах, задачах
@@ -82,7 +84,7 @@ class Company(db.Model, UserMixin):
     # информация о компании
     info_about_company = db.Column(db.String(300), nullable=True)
     # владелец компании
-    owner = db.Column(db.Boolean, default=False, nullable=False)
+    owner = db.Column(db.String(300), default=False, nullable=False)
 
 
 class Project(db.Model, UserMixin):
@@ -123,10 +125,27 @@ def load_user(user_id):
 
 
 # главная страница
+@app.route('/about')
+def about():
+    return render_template("about.html")
+
+
+@app.route('/sup')
+def sup():
+    if is_auth:
+        return render_template("sup2.html", data=user_auth_dict)
+    else:
+        return render_template("sup.html")
+
+
+# главная страница
 @app.route('/')
 def home():
     db.create_all()
-    return render_template("home.html")
+    if is_auth:
+        return render_template("regbod.html", data=user_auth_dict)
+    else:
+        return render_template("noregbod.html")
 
 
 # страница регистрации
@@ -217,6 +236,8 @@ def confirmation(token):
 def login():
     global user_auth_dict
     global my_nickname
+    global is_auth
+    global user__auth
 
     # Если пользователь заходит не авторизованный, то ему предлагают авторизоваться
     if request.method == "GET":
@@ -244,11 +265,15 @@ def login():
                 my_nickname = user__auth
                 login_user(user_auth)
                 print(user__auth)
-                return render_template('regbod.html', data=user__auth)
+                is_auth = 1
+                return redirect("/")
+                #return render_template('regbod.html', data=user_auth_dict)
 
             else:
+                is_auth = 0
                 return 'vi ne voshli--------------'
         else:
+            is_auth = 0
             return 'vi ne voshli'
 
 
@@ -256,8 +281,10 @@ def login():
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
+    global is_auth
     logout_user()
-    return 'vi visli--------------------------'
+    is_auth = 0
+    return redirect("/")
 
 
 # успешная регистрация
@@ -286,7 +313,7 @@ def my_account(nickname):
 
 
 # создание комапании
-@app.route('/account/<nickname>/create_company')
+@app.route('/account/<nickname>/create_company', methods=['GET', 'POST'])
 @login_required
 def create_company(nickname):
     # импортируем переменные
@@ -300,7 +327,9 @@ def create_company(nickname):
     if request.method == "POST":
         # получение данных пользователя для регистрации компании
         user_account = User.query.filter_by(username=nickname).first()
+        print("1")
         user_account_dict = user_account.__dict__
+        print("1")
         email_user_ = user_account_dict['email']
         print(email_user_)
 
@@ -328,7 +357,7 @@ def create_company(nickname):
 
 
 # отображение компании
-@app.route('/<nickname>/company')
+@app.route('/account/<nickname>/my_company')
 @login_required
 def my_company(nickname):
     # находим компанию юзера
@@ -337,9 +366,9 @@ def my_company(nickname):
         company_dict = user_company.__dict__
         print(company_dict)
 
-        return render_template("company.html", data=company_dict)
+        return render_template("company.html", data=user_auth_dict, cmp=company_dict)
     except:
-        return 'У вас пока что нет компании'
+        return render_template("nocomp.html", data=user_auth_dict)
 
 
 if __name__ == '__main__':

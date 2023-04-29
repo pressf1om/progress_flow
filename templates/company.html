@@ -1,10 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-
-</body>
-</html>
+{% extends "regbod.html" %}
+{% block ext %}
+            <br>Название компании:{{ cmp.name_of_company }}</br>
+            <br>Информация о компании: {{ cmp.info_about_company }}</br>
+            <br>Создатель: {{ cmp.owner }}</br>
+{% endblock %}

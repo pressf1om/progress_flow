@@ -1,0 +1,8 @@
+{% extends "regbod.html" %}
+{% block ext %}
+У вас пока нет компании
+      <form method="post">
+            <ul><a href="/account/{{ data.username }}/create_company">Создать компанию</a></ul>
+      </form>
+
+{% endblock %}

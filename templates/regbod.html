@@ -1,14 +1,16 @@
 {% extends "main.html" %}
 {% block body %}
   <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
-        <h5 class="my-0 mr-md-auto font-weight-normal"><a class="p-2 text-dark" href="/home">ProgressFlow</a></h5>
+        <h5 class="my-0 mr-md-auto font-weight-normal"><a class="p-2 text-dark" href="/">ProgressFlow</a></h5>
         <nav class="my-2 my-md-0 mr-md-3">
-            <a class="p-2 text-dark" href="/">Домой</a>
+            <a class="p-2 text-dark" href="/account/{{ data.username }}/my_company">Компания</a>
             <a class="p-2 text-dark" href="/projects">Проекты</a>
-            <a class="p-2 text-dark" href="/account/{{ data }}/my_company">Компания</a>
-            <a class="p-2 text-dark" href="/about">Работники</a>
-            <a class="p-2 text-dark" href="/account/{{ data }}">{{ data }}</a>
-            <a class="p-2 text-dark" href="/sup">Поддержкa</a>
+            <a class="p-2 text-dark" href="/">Сотрудники</a>
+            <a class="p-2 text-dark" href="/">Задачи</a>
+            <a class="p-2 text-dark" href="/">Роадмап</a>
+            <a class="p-2 text-dark" href="/">Канбан</a>
+            <a class="p-2 text-dark" href="/sup">Роадмап</a>
+            <a class="p-2 text-dark" href="/account/{{ data.username }}">{{ data.username }}</a>
         </nav>
   </div>
 {% block ext %} {% endblock %}
