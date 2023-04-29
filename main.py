@@ -50,6 +50,7 @@ user_auth_dict = None
 my_nickname = None
 is_auth = None
 user__auth = None
+id_of_company = None
 
 
 # классы с данными о юзерах, компаниях, проектах, задачах
@@ -122,6 +123,11 @@ class Tasks(db.Model, UserMixin):
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
+
+
+@app.route('/projects')
+def project():
+    return render_template("project.html")
 
 
 # главная страница
@@ -320,9 +326,6 @@ def create_company(nickname):
     global username
     global password
     global email
-    global email_confirmation
-    global password_email_confirmation
-    global token
 
     if request.method == "POST":
         # получение данных пользователя для регистрации компании
@@ -331,6 +334,65 @@ def create_company(nickname):
         user_account_dict = user_account.__dict__
         print("1")
         email_user_ = user_account_dict['email']
+        print(email_user_)
+
+        name_of_company_ = request.form['name_of_company']
+        info_about_company_ = request.form['info_about_company']
+        owner_ = nickname
+
+        print(name_of_company_)
+        print(info_about_company_)
+        print(owner_)
+
+        company = Company(name_of_company=name_of_company_, info_about_company=info_about_company_, owner=owner_)
+
+        try:
+            # регистрация в базе
+            db.session.add(company)
+            db.session.commit()
+
+            return redirect(f'/account/{owner_}/my_company')
+        except Exception as r:
+            print(str(r))
+            return "Error(("
+    else:
+        return render_template("make_company.html", data=nickname)
+
+
+# отображение компании
+@app.route('/account/<nickname>/my_company')
+@login_required
+def my_company(nickname):
+    global name_of_company
+    # находим компанию юзера
+    user_company = Company.query.filter_by(owner=nickname).first()
+    try:
+        company_dict = user_company.__dict__
+        print(company_dict)
+        name_of_company = company_dict['name_of_company']
+
+        return render_template("company.html", data=user_auth_dict, cmp=company_dict)
+    except:
+        return render_template("nocomp.html", data=user_auth_dict)
+
+
+# создание проекта
+@app.route('/account/<nickname>/create_project', methods=['GET', 'POST'])
+@login_required
+def create_project(nickname):
+    # импортируем переменные
+    global username
+    global password
+    global email
+    global name_of_company
+
+    if request.method == "POST":
+        # получение данных пользователя для создания проекта
+        project_account = Project.query.filter_by(owner_project=nickname).first()
+        print("1")
+        project_account_dict = project_account.__dict__
+        print("1")
+        email_user_ = project_account_dict['email']
         print(email_user_)
 
         name_of_company_ = request.form['name_of_company']
