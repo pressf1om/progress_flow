@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Админ панель</title>
+</head>
+</div>
+<div class="oll">
+    <h1 align="center">Все пользователи: </h1>
+</div>
+{% for el in data %}
+<div class="container">
+    <div class="card-deck mb-3 text-center">
+        <div class="print">
+            <h2>ID: {{ el.id }}</h2>
+            <h2>Login: {{ el.username }}<br></h2>
+            <h2><br>Password: {{ el.password }}</h2>
+            <h2><br>Email: {{ el.email }}</h2>
+        </div>
+        <style>
+                .print:hover {
+                    border: 7px solid #0866d1;
+                }
+          </style>
+        {% endfor %}
+</html>
