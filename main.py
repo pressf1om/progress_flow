@@ -277,13 +277,14 @@ def print_user():
 
 
 # личный кабинет ( В процессе )
-@app.route('/account/<my_nickname>')
+@app.route('/account/<nickname>')
 @login_required
-def my_my_account(name_auth):
-    global my_nickname
+def my_account(nickname):
+    user_account = User.query.filter_by(username=nickname).first()
+    user_account_dict = user_account.__dict__
+    print(user_account_dict)
 
-    return render_template("my_account.html")
-
+    return render_template("my_account.html", data=user_account_dict)
 
 
 if __name__ == '__main__':
