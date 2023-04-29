@@ -1,10 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>/</title>
-</head>
-<body>
-/
-</body>
-</html>
+{% extends "noregbod.html" %}
+{% block ext %}
+    <title>Регистрация</title>
+        <style>
+            .input_form {
+                background-color:#ffffff;
+	            border-radius:25px;
+                border:2px solid #dcdcdc;
+                color:#121212;
+                font-family:Trebuchet MS;
+                font-size:35px;
+            }
+            .button_reg {
+                background-color:#ffffff;
+                border-radius:25px;
+                border:2px solid #dcdcdc;
+                color:#121212;
+                font-family:Trebuchet MS;
+                font-size:30px;
+            }
+
+            .reg {
+                position:relative;
+                top: 20%;
+            }
+        </style>
+  <div class="reg" align="center">
+      <form method="post">
+          <h1>Письмо с подтверждением регистрации было выслано на указанный адрес.</h1>
+      </form>
+  </div>
+{% endblock %}
+

@@ -1,29 +1,37 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
-    <link rel="shortcut icon" href="/1.ico" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css?family=Vibur" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
-    <link rel="stylesheet" href="css/style.css">
-      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <title>Main</title>
-      <link rel="shortcut icon" href="https://cdn.discordapp.com/attachments/631866277580898334/835417119407341578/icon.png" type="image/x-icon">
-    <style>
-    </style>
-  </head>//
-  <body>
-  <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
-        <h5 class="my-0 mr-md-auto font-weight-normal"><a class="p-2 text-dark" href="/home">ProgressFlow</a></h5>
-        <nav class="my-2 my-md-0 mr-md-3">
-            <a class="p-2 text-dark" href="/home">Home</a>
-            <a class="p-2 text-dark" href="/about">About the project</a>
-            <a class="p-2 text-dark" href="/sup">Support</a>
-            <a class="p-2 text-dark" href="/login/reg">Registration</a>
-        </nav>
-        </div>
-  {% block body %}{% endblock %}
-  </body>
+{% extends "noregbod.html" %}
+{% block ext %}
+    <title>Регистрация</title>
+        <style>
+            .input_form {
+                background-color:#ffffff;
+	            border-radius:25px;
+                border:2px solid #dcdcdc;
+                color:#121212;
+                font-family:Trebuchet MS;
+                font-size:35px;
+            }
+            .button_reg {
+                background-color:#ffffff;
+                border-radius:25px;
+                border:2px solid #dcdcdc;
+                color:#121212;
+                font-family:Trebuchet MS;
+                font-size:30px;
+            }
 
-</html>
+            .reg {
+                position:relative;
+                top: 20%;
+            }
+        </style>
+  <div class="reg" align="center">
+      <form method="post">
+          <h1>Регистрация</h1>
+            <ul><input type="text" placeholder="Никнейм" name="username" id="username" class="input_form"></ul>
+             <ul><input type="text" placeholder="Пароль" name="password" id="password" class="input_form"></ul>
+              <ul><input type="email" placeholder="Почта" name="email" id="email" class="input_form"></ul>
+              <ul><button type="submit" class="button_reg">Зарегистрироваться</button></ul>
+      </form>
+  </div>
+{% endblock %}
+

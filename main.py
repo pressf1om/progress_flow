@@ -132,7 +132,7 @@ def home():
 
 
 # страница регистрации
-@app.route("/login/registration", methods=['POST', 'GET'])
+@app.route("/registration", methods=['POST', 'GET'])
 def registration():
     # импортируем переменные
     global username
@@ -276,7 +276,7 @@ def print_user():
     return render_template("admin_of_progressfow.html", data=user_print)
 
 
-# личный кабинет ( В процессе )
+# личный кабинет
 @app.route('/account/<nickname>')
 @login_required
 def my_account(nickname):
@@ -285,6 +285,85 @@ def my_account(nickname):
     print(user_account_dict)
 
     return render_template("my_account.html", data=user_account_dict)
+
+
+
+@app.route('/account/<nickname>/create_company')
+@login_required
+def create_company(nickname):
+    # импортируем переменные
+    global username
+    global password
+    global email
+    global email_confirmation
+    global password_email_confirmation
+    global token
+
+    # получение почты пользователя и отправка сообщения на почту
+    if request.method == "POST":
+        # получение данных из формы
+        username = request.form['username']
+        password = request.form['password']
+        email = request.form['email']
+
+        token = confirmation_tool.dumps(email, salt='email-confirm')
+
+        message_confirm = MIMEMultipart()
+        message_confirm['From'] = email_confirmation
+        message_confirm['To'] = email
+        message_confirm['Subject'] = 'Подтверждение'
+
+        # шаблон письма
+        body = f"Здраствуйте! Вы регистрируйтесь на сервисе ProgressFlow. \nДля подтверждения электронной почты и завершения регистрации перейдите по ссылке: http://{host}/email-confirmation/{token}. \nЕсли это были не вы, просто проигнорируйте это сообщение. \nС уважением, команда ProgressFlow:)"
+        message_confirm.attach(MIMEText(body, 'plain'))
+
+        # отправка
+        server = smtplib.SMTP_SSL('smtp.mail.ru', 465)
+        server.login(email_confirmation, password_email_confirmation)
+        server.send_message(message_confirm)
+        server.quit()
+
+        return render_template("check_email.html")
+    else:
+        return render_template("registration.html")
+
+    # айди компании
+    id_of_company = db.Column(db.Integer, primary_key=True)
+    # название компании
+    name_of_company = db.Column(db.String(200), nullable=False, unique=True)
+    # информация о компании
+    info_about_company = db.Column(db.String(300), nullable=True)
+    # владелец компании
+    owner = db.Column(db.Boolean, default=False, nullable=False)
+
+
+
+
+
+
+@app.route('/account/<nickname>/my_company')
+@login_required
+def my_company(nickname):
+
+    user_company = User.query.filter_by(username=nickname).first()
+    user_account_dict = user_account.__dict__
+    print(user_account_dict)
+
+    return render_template("my_account.html", data=user_account_dict)
+
+
+admin = db.Column(db.Boolean, default=False, nullable=True)
+    # компания, в которой работает юзер
+    related_company = db.Column(db.Integer, default=False, nullable=True)
+    # должность в компании
+    position_at_work = db.Column(db.String(120), nullable=True)
+    # проект над которым работает юзер
+    id_of_works_on_the_project = db.Column(db.Integer, nullable=True)
+    # активная задача пользователя
+    task_at_work = db.Column(db.Integer, nullable=True)
+
+
+
 
 
 if __name__ == '__main__':
