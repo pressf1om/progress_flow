@@ -15,7 +15,6 @@ import sqlalchemy
 import itsdangerous
 from flask_login import LoginManager, login_user, login_required, logout_user
 
-
 # настройки приложения
 app = Flask(__name__)
 app.debug = True
@@ -26,7 +25,6 @@ db = SQLAlchemy(app)
 confirmation_tool = itsdangerous.URLSafeTimedSerializer("progress_flow_secret_key")
 login_manager = LoginManager()
 login_manager.init_app(app)
-
 
 # необходимые переменные
 username = None
@@ -78,7 +76,7 @@ class User(db.Model, UserMixin):
 
 class Company(db.Model, UserMixin):
     # айди компании
-    id_of_company = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     # название компании
     name_of_company = db.Column(db.String(200), nullable=False, unique=True)
     # информация о компании
@@ -89,7 +87,7 @@ class Company(db.Model, UserMixin):
 
 class Project(db.Model, UserMixin):
     # айди проекта
-    id_of_project = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     # название проекта
     name_of_project = db.Column(db.String(200), nullable=False, unique=True)
     # информация о проекте
@@ -100,7 +98,7 @@ class Project(db.Model, UserMixin):
 
 class Tasks(db.Model, UserMixin):
     # айди задачи
-    id_of_tasks = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     # название задачи
     name_of_task = db.Column(db.String(200), nullable=False)
     # информация о задаче
@@ -174,7 +172,6 @@ def registration():
 # регистрация
 @app.route("/email-confirmation/<token>", methods=['POST', 'GET'])
 def confirmation(token):
-
     global username
     global password
     global email
@@ -214,10 +211,10 @@ def confirmation(token):
 
     return "1"
 
+
 # вход
 @app.route('/login', methods=['POST', 'GET'])
 def login():
-
     global user_auth_dict
     global my_nickname
 
@@ -228,7 +225,6 @@ def login():
         # получаем отправленные данные
         login__ = request.form.get('username')
         password__ = request.form.get('password')
-
 
         if login__ and password__:
             # находим совпадения в базе данных
@@ -247,7 +243,8 @@ def login():
             if user__auth == login__ and pass__auth == password__:
                 my_nickname = user__auth
                 login_user(user_auth)
-                return 'ВЫ ВОЛШЛТ'
+                print(user__auth)
+                return render_template('regbod.html', data=user__auth)
 
             else:
                 return 'vi ne voshli--------------'
@@ -261,6 +258,7 @@ def login():
 def logout():
     logout_user()
     return 'vi visli--------------------------'
+
 
 # успешная регистрация
 @app.route('/successful_registration')
@@ -287,7 +285,7 @@ def my_account(nickname):
     return render_template("my_account.html", data=user_account_dict)
 
 
-
+# создание комапании
 @app.route('/account/<nickname>/create_company')
 @login_required
 def create_company(nickname):
@@ -299,71 +297,49 @@ def create_company(nickname):
     global password_email_confirmation
     global token
 
-    # получение почты пользователя и отправка сообщения на почту
     if request.method == "POST":
-        # получение данных из формы
-        username = request.form['username']
-        password = request.form['password']
-        email = request.form['email']
+        # получение данных пользователя для регистрации компании
+        user_account = User.query.filter_by(username=nickname).first()
+        user_account_dict = user_account.__dict__
+        email_user_ = user_account_dict['email']
+        print(email_user_)
 
-        token = confirmation_tool.dumps(email, salt='email-confirm')
+        name_of_company_ = request.form['name_of_company']
+        info_about_company_ = request.form['info_about_company']
+        owner_ = nickname
 
-        message_confirm = MIMEMultipart()
-        message_confirm['From'] = email_confirmation
-        message_confirm['To'] = email
-        message_confirm['Subject'] = 'Подтверждение'
+        print(name_of_company_)
+        print(info_about_company_)
+        print(owner_)
 
-        # шаблон письма
-        body = f"Здраствуйте! Вы регистрируйтесь на сервисе ProgressFlow. \nДля подтверждения электронной почты и завершения регистрации перейдите по ссылке: http://{host}/email-confirmation/{token}. \nЕсли это были не вы, просто проигнорируйте это сообщение. \nС уважением, команда ProgressFlow:)"
-        message_confirm.attach(MIMEText(body, 'plain'))
+        company = Company(name_of_company=name_of_company_, info_about_company=info_about_company_, owner=owner_)
 
-        # отправка
-        server = smtplib.SMTP_SSL('smtp.mail.ru', 465)
-        server.login(email_confirmation, password_email_confirmation)
-        server.send_message(message_confirm)
-        server.quit()
+        try:
+            # регистрация в базе
+            db.session.add(company)
+            db.session.commit()
 
-        return render_template("check_email.html")
+            return redirect(f'/account/{owner_}/my_company')
+        except Exception as r:
+            print(str(r))
+            return "Error(("
     else:
-        return render_template("registration.html")
-
-    # айди компании
-    id_of_company = db.Column(db.Integer, primary_key=True)
-    # название компании
-    name_of_company = db.Column(db.String(200), nullable=False, unique=True)
-    # информация о компании
-    info_about_company = db.Column(db.String(300), nullable=True)
-    # владелец компании
-    owner = db.Column(db.Boolean, default=False, nullable=False)
+        return render_template("make_company.html", data=nickname)
 
 
-
-
-
-
-@app.route('/account/<nickname>/my_company')
+# отображение компании
+@app.route('/<nickname>/company')
 @login_required
 def my_company(nickname):
+    # находим компанию юзера
+    user_company = Company.query.filter_by(owner=nickname).first()
+    try:
+        company_dict = user_company.__dict__
+        print(company_dict)
 
-    user_company = User.query.filter_by(username=nickname).first()
-    user_account_dict = user_account.__dict__
-    print(user_account_dict)
-
-    return render_template("my_account.html", data=user_account_dict)
-
-
-admin = db.Column(db.Boolean, default=False, nullable=True)
-    # компания, в которой работает юзер
-    related_company = db.Column(db.Integer, default=False, nullable=True)
-    # должность в компании
-    position_at_work = db.Column(db.String(120), nullable=True)
-    # проект над которым работает юзер
-    id_of_works_on_the_project = db.Column(db.Integer, nullable=True)
-    # активная задача пользователя
-    task_at_work = db.Column(db.Integer, nullable=True)
-
-
-
+        return render_template("company.html", data=company_dict)
+    except:
+        return 'У вас пока что нет компании'
 
 
 if __name__ == '__main__':

@@ -1,17 +1,6 @@
 {% extends "regbod.html" %}
 {% block body %}
-<br>
-    <br>email: {{ data.email }}</br>
-    <br>username: {{ data.username }}</br>
-    <br>password: {{ data.password }}</br>
-    <br>created date: {{ data.created_date }}</br>
-    <br>admin: {{ data.admin }}</br>
-    <br>related company: {{ data.related_company }}</br>
-    <br>position at work: {{ data.position_at_work }}</br>
-    <br>id of works on the project: {{ data.id_of_works_on_the_project }}</br>
-    <br>task at work: {{ data.task_at_work }}</br>
-</br>
-<div align="right" >
+    <title>Регистрация</title>
         <style>
             .input_form {
                 background-color:#ffffff;
@@ -37,9 +26,12 @@
         </style>
   <div class="reg" align="center">
       <form method="post">
-              <ul><button type="submit" class="button_reg" href="/account/{{ data.username }}/create_company">Зарегистрировать компанию</button></ul>
+          <h1>Регистрация</h1>
+            <ul><input type="text" placeholder="Название компании" name="name_of_company" id="name_of_company" class="input_form"></ul>
+             <ul><input type="text" placeholder="Информация о компании" name="info_about_company" id="info_about_company" class="input_form"></ul>
+              <ul><button type="submit" class="button_reg">Зарегистрировать</button></ul>
       </form>
   </div>
-    </div>
+
 {% block ext %} {% endblock %}
 {% endblock %}
