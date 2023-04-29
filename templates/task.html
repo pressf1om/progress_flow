@@ -1,10 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>//</title>
-</head>
-<body>
+{% extends "regbod.html" %}
+{% block ext %}
+    <title>Задание</title>
+        <style>
+            .input_form {
+                background-color:#ffffff;
+	            border-radius:25px;
+                border:2px solid #dcdcdc;
+                color:#121212;
+                font-family:Trebuchet MS;
+                font-size:35px;
+            }
+            .button_reg {
+                background-color:#ffffff;
+                border-radius:25px;
+                border:2px solid #dcdcdc;
+                color:#121212;
+                font-family:Trebuchet MS;
+                font-size:30px;
+            }
 
-</body>
-</html>
+            .reg {
+                position:relative;
+                top: 20%;
+            }
+        </style>
+  <div class="reg" align="center">
+      <form method="post">
+          <h1>Задание</h1>
+            <ul><input type="text" placeholder="Название проекта" name="name_of_project" id="name_of_project" class="input_form"></ul>
+             <ul><input type="text" placeholder="Информация о проекте" name="info_about_project" id="info_about_project" class="input_form"></ul>
+              <ul><button type="submit" class="button_task">Создать Задание</button></ul>
+      </form>
+  </div>
+
+{% endblock %}
