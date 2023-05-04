@@ -1,12 +1,7 @@
-import os
-import pyotp
-import random
-from flask import Flask, Response, request, render_template, flash
-from time import time
+from flask import Flask, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.utils import redirect
-from werkzeug.security import check_password_hash
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
@@ -31,18 +26,12 @@ username = None
 password = None
 email = None
 email_confirmation = 'progress.flow@mail.ru'
-password_email_confirmation = '"1eN8SqKWhmJD0zTzVCNC"'
+password_email_confirmation = "1eN8SqKWhmJD0zTzVCNC"
 token = None
 host = '127.0.0.1:5000'
-
 email_from = "progress.flow@mail.ru"
 password_email = "1eN8SqKWhmJD0zTzVCNC"
-email_confirmation = "progress.flow@mail.ru"
-password_email_confirmation = "1eN8SqKWhmJD0zTzVCNC"
-
 email_user = None
-email_2fa = 'progress.flow@mail.ru'
-password_email_2fa = '1eN8SqKWhmJD0zTzVCNC'
 number = None
 hotp = None
 result_ver = None
@@ -74,6 +63,8 @@ class User(db.Model, UserMixin):
     id_of_works_on_the_project = db.Column(db.Integer, nullable=True)
     # активная задача пользователя
     task_at_work = db.Column(db.Integer, nullable=True)
+    # компания, которой владеет юзер
+    user_own_company = db.Column(db.String(120), nullable=True)
 
 
 class Company(db.Model, UserMixin):
@@ -121,14 +112,20 @@ class Tasks(db.Model, UserMixin):
     end_working_on_a_task = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
 
 
+# авторизация
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
 
 
-@app.route('/projects')
-def project():
-    return render_template("project.html", data=user_auth_dict)
+# главная страница
+@app.route('/')
+def home():
+    db.create_all()
+    if is_auth:
+        return render_template("regbod.html", data=user_auth_dict, data_of__company=company_account_dict)
+    else:
+        return render_template("home.html")
 
 
 # о проекте
@@ -137,22 +134,13 @@ def about():
     return render_template("about.html")
 
 
+# поддержка
 @app.route('/sup')
 def sup():
     if is_auth:
-        return render_template("sup2.html", data=user_auth_dict)
+        return render_template("regbod_sup.html", data=user_auth_dict)
     else:
-        return render_template("sup.html")
-
-
-# главная страница
-@app.route('/')
-def home():
-    db.create_all()
-    if is_auth:
-        return render_template("regbod.html", data=user_auth_dict)
-    else:
-        return render_template("noregbod.html")
+        return render_template("noreg_sup.html")
 
 
 # страница регистрации
@@ -203,8 +191,7 @@ def confirmation(token):
     global email
 
     try:
-        email_ = confirmation_tool.loads(token, salt='email-confirm', max_age=120)
-
+        confirmation_tool.loads(token, salt='email-confirm', max_age=120)
         try:
             user_ = User(username=username, password=password, email=email)
 
@@ -218,7 +205,7 @@ def confirmation(token):
             message.attach(MIMEText(body, 'plain'))
 
             server = smtplib.SMTP_SSL('smtp.mail.ru', 465)
-            server.login("progress.flow@mail.ru", "1eN8SqKWhmJD0zTzVCNC")
+            server.login(email_confirmation, password_email_confirmation)
 
             # регистрация в базе
             db.session.add(user_)
@@ -231,11 +218,8 @@ def confirmation(token):
         except Exception as r:
             print(str(r))
             return "Error(("
-
     except:
         return 'Error(('
-
-    return "1"
 
 
 # вход
@@ -274,7 +258,7 @@ def login():
                 print(user__auth)
                 is_auth = 1
                 return redirect("/")
-                #return render_template('regbod.html', data=user_auth_dict)
+                # return render_template('regbod.html', data=user_auth_dict)
 
             else:
                 is_auth = 0
@@ -316,27 +300,19 @@ def my_account(nickname):
     user_account_dict = user_account.__dict__
     print(user_account_dict)
 
-    return render_template("my_account.html", data=user_account_dict)
+    company_account = Company.query.filter_by(owner=nickname).first()
+    company_account_dict = company_account.__dict__
+    print(company_account_dict)
+
+    return render_template("my_account.html", data=user_account_dict, data_of__company=company_account_dict)
 
 
 # создание комапании
 @app.route('/account/<nickname>/create_company', methods=['GET', 'POST'])
 @login_required
 def create_company(nickname):
-    # импортируем переменные
-    global username
-    global password
-    global email
-
     if request.method == "POST":
-        # получение данных пользователя для регистрации компании
-        user_account = User.query.filter_by(username=nickname).first()
-        print("1")
-        user_account_dict = user_account.__dict__
-        print("1")
-        email_user_ = user_account_dict['email']
-        print(email_user_)
-
+        # получение данных от пользователя для регистрации компании
         name_of_company_ = request.form['name_of_company']
         info_about_company_ = request.form['info_about_company']
         owner_ = nickname
@@ -364,56 +340,44 @@ def create_company(nickname):
 @app.route('/account/<nickname>/my_company')
 @login_required
 def my_company(nickname):
-    global name_of_company
     # находим компанию юзера
     user_company = Company.query.filter_by(owner=nickname).first()
     try:
         company_dict = user_company.__dict__
         print(company_dict)
-        name_of_company = company_dict['name_of_company']
 
         return render_template("company.html", data=user_auth_dict, cmp=company_dict)
     except:
         return render_template("nocomp.html", data=user_auth_dict)
 
-
 ########################################################################################################################
-"""
-# не работает
+# написать отображение страниц так, что если у пользователя нет компании, то он не может создать проект
+
+
 # создание проекта
-@app.route('/account/<name_of_company_>/create_project', methods=['GET', 'POST'])
+@app.route('/account/<nickname>/<company_of_user>/create_project', methods=['GET', 'POST'])
 @login_required
-def create_project(name_of_company_):
-    # импортируем переменные
-    global username
-    global password
-    global email
+def create_project(company_of_user, nickname):
+
+    print(f'nickname make project = {nickname}')
 
     if request.method == "POST":
         # получение данных для создания проекта
-        project_account = Company.query.filter_by(name_of_company=name_of_company_).first()
-        # project_account = Project.query.filter_by(owner_project=name_of_company_).first()
-        print(project_account)
-        project_account_dict = project_account.__dict__
-        print(project_account_dict)
-
-
         name_of_project_ = request.form['name_of_project']
         info_about_project_ = request.form['info_about_project']
-        name_from_form_company = request.form['name_company']
+        owner_project_ = company_of_user
 
         print(name_of_project_)
         print(info_about_project_)
-        print(project_owner)
 
-        projects = Project(name_of_project=name_of_project_, info_about_project=info_about_project_, owner_project=name_from_form_company)
+        projects = Project(name_of_project=name_of_project_, info_about_project=info_about_project_, owner_project=owner_project_)
 
         try:
             # регистрация в базе
             db.session.add(projects)
             db.session.commit()
 
-            return redirect(f'/account/{project_owner}/projects')
+            return redirect(f'/account/{owner_project_}/projects')
         except Exception as r:
             print(str(r))
             return "Error(("
@@ -422,11 +386,14 @@ def create_project(name_of_company_):
 
 
 # отображение проекта
-@app.route('/account/<project_owner>/projects')
+@app.route('/account/<nickname>/<company_of_user>/projects')
 @login_required
-def company_project_(project_owner):
+def company_project_(company_of_user, nickname):
     # находим проект компании
-    company_project = Project.query.filter_by(owner=project_owner).first()
+    company_project = Project.query.filter_by(owner_project=company_of_user).first()
+
+    print(f'nickname display = {nickname}')
+
     try:
         project_dict = company_project.__dict__
         print(project_dict)
@@ -435,8 +402,8 @@ def company_project_(project_owner):
 
         return render_template("projectdisplay.html", data=user_auth_dict, prj=project_dict)
     except:
-        return render_template("nocproject.html", data=user_auth_dict)
-"""
+        return render_template("noproject.html", data=user_auth_dict)
+
 
 ########################################################################################################################
 

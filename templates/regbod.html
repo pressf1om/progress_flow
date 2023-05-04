@@ -4,12 +4,11 @@
         <h5 class="my-0 mr-md-auto font-weight-normal"><a class="p-2 text-dark" href="/">ProgressFlow</a></h5>
         <nav class="my-2 my-md-0 mr-md-3">
             <a class="p-2 text-dark" href="/account/{{ data.username }}/my_company">Компания</a>
-            <a class="p-2 text-dark" href="/projects">Проекты</a>
+            <a class="p-2 text-dark" href="/account/{{ data.username }}/{{ data_of__company.name_of_company }}/projects">Проекты</a>
             <a class="p-2 text-dark" href="/">Сотрудники</a>
             <a class="p-2 text-dark" href="/">Задачи</a>
             <a class="p-2 text-dark" href="/">Роадмап</a>
             <a class="p-2 text-dark" href="/">Канбан</a>
-            <a class="p-2 text-dark" href="/sup">Роадмап</a>
             <a class="p-2 text-dark" href="/account/{{ data.username }}">{{ data.username }}</a>
         </nav>
   </div>
